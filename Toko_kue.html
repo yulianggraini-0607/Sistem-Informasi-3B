@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasir Yuli Bakery</title>
+
+    <!-- Style CSS -->
+    <style>
+        :root {
+            --primary: #ec4899;
+            --secondary: #db2777;
+            --bg-color: #fdf2f8;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --success: #16a34a;
+        }
+
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { font-size: 1.2rem; }
+        .cart-badge { font-size: 0.9rem; background: #fbbf24; color: #000; padding: 2px 8px; border-radius: 12px; font-weight: bold;}
+
+        /* --- Layout Utama --- */
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            flex-grow: 1;
+            align-items: start;
+        }
+
+        /* --- Bagian Produk (Kiri) --- */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, border 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background-color: #e5e7eb;
+        }
+
+        .product-info {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-info h3 {
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .product-info .price {
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: auto;
+        }
+
+        /* --- Bagian Kasir (Kanan) --- */
+        .cart-section {
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            position: sticky;
+            top: 80px; 
+            max-height: calc(100vh - 100px);
+            overflow: hidden;
+        }
+
+        .cart-header {
+            padding: 15px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            font-weight: bold;
+        }
+
+        .cart-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            list-style: none;
+            max-height: 300px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px dashed #e5e7eb;
+            font-size: 0.9rem;
+        }
+
+        .item-info strong { display: block; color: #374151; }
+        .item-info small { color: #6b7280; }
+
+        .btn-remove {
+            background: #fee2e2; color: #991b1b;
+            border: none; width: 24px; height: 24px;
+            border-radius: 4px; cursor: pointer;
+            margin-left: 8px; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* --- Area Pembayaran --- */
+        .checkout-area {
+            background: #fff;
+            padding: 15px;
+            border-top: 2px solid #f1f5f9;
+        }
+
+        /* Styling baru untuk baris rincian harga */
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #6b7280;
+        }
+
+        .summary-row.discount {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .summary-row.final-total {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-color);
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border-top: 2px dashed #e5e7eb;
+            padding-top: 10px;
+        }
+
+        .promo-badge {
+            font-size: 0.8rem;
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+            display: none; /* Default hidden */
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            outline: none;
+        }
+        .input-group input:focus { border-color: var(--primary); }
+
+        .change-display {
+            display: flex; justify-content: space-between;
+            padding: 10px; border-radius: 8px;
+            font-weight: bold; margin-bottom: 10px;
+            background: #f3f4f6; color: #6b7280;
+        }
+        .change-ok { background: #dcfce7; color: #166534; }
+        .change-bad { background: #fee2e2; color: #991b1b; }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn {
+            flex: 1; padding: 12px; border: none; border-radius: 8px;
+            font-weight: bold; cursor: pointer; color: white; transition: 0.2s;
+        }
+        .btn-print { background: var(--primary); }
+        .btn-print:hover { background: var(--secondary); }
+        .btn-reset { background: #ef4444; }
+        .btn-reset:hover { background: #dc2626; }
+
+        @media (max-width: 768px) {
+            body { height: auto; display: block; }
+            .container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 15px;
+            }
+            .products-grid {
+                order: 1; 
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .cart-section {
+                order: 2; 
+                position: static; 
+                max-height: none;
+                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            }
+            .cart-list { max-height: none; }
+        }
+
+        /* --- PRINT AREA --- */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #receipt-area,
+            #receipt-area * {
+                visibility: visible;
+            }
+
+            #receipt-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                padding: 10px;
+                font-family: 'Courier New', Courier, monospace;
+                color: black;
+                background: white;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Yuli Bakery</h1>
+        <div class="cart-badge" id="cartCount">0 item</div>
+    </header>
+
+    <div class="container">
+        <div class="products-grid" id="productContainer"><div class="product-card">
+            <img src="red velvet cupcake.jpg" alt="Cupcake" class="product-img">
+            <div class="product-info">
+                <h3>Cupcake</h3>
+                <div class="price">Rp 15.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="donut.jpg" alt="Donut" class="product-img">
+            <div class="product-info">
+                <h3>Donut</h3>
+                <div class="price">Rp 5.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="tart fruit.jpg" alt="Tart" class="product-img">
+            <div class="product-info">
+                <h3>Tart</h3>
+                <div class="price">Rp 90.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="deseer tbox.jpg" alt="Deesertbox" class="product-img">
+            <div class="product-info">
+                <h3>Deesertbox</h3>
+                <div class="price">Rp 25.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="coco chip cookies.jpg" alt="Cookies" class="product-img">
+            <div class="product-info">
+                <h3>Cookies</h3>
+                <div class="price">Rp 10.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="matcha.jpg" alt="Matcha latte" class="product-img">
+            <div class="product-info">
+                <h3>Matcha latte</h3>
+                <div class="price">Rp 15.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="fruit Puding.jpg" alt="Pudding" class="product-img">
+            <div class="product-info">
+                <h3>Pudding</h3>
+                <div class="price">Rp 10.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="brownies.jpg" alt="Brownies" class="product-img">
+            <div class="product-info">
+                <h3>Brownies</h3>
+                <div class="price">Rp 60.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="tiramisu.jpg" alt="Tiramisu cake" class="product-img">
+            <div class="product-info">
+                <h3>Tiramisu cake</h3>
+                <div class="price">Rp 25.000</div>
+            </div>
+        </div><div class="product-card">
+            <img src="red velvet.jpg" alt="Redvelvet cake" class="product-img">
+            <div class="product-info">
+                <h3>Redvelvet cake</h3>
+                <div class="price">Rp 25.000</div>P
+            </div>
+        </div></div>
+
+        <div class="cart-section">
+            <div class="cart-header">Rincian Pesanan</div>
+            
+            <ul class="cart-list" id="cartList">
+                <li style="text-align:center; padding: 20px; color:#9ca3af;">Keranjang kosong</li>
+            </ul>
+
+            <div class="checkout-area">
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span id="subtotalDisplay">Rp 0</span>
+                </div>
+                
+                <div class="summary-row discount" id="discountRow" style="display:none;">
+                    <span>Diskon (10%) <span class="promo-badge" style="display:inline;">Min. 4 Item</span></span>
+                    <span id="discountDisplay">- Rp 0</span>
+                </div>
+
+                <div class="summary-row final-total">
+                    <span>Total Akhir</span>
+                    <span id="totalDisplay">Rp 0</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="number" id="paymentInput" placeholder="Nominal Uang" oninput="calculateChange()">
+                </div>
+
+                <div id="changeBox" class="change-display">
+                    <span>Kembali</span>
+                    <span id="changeDisplay">Rp 0</span>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-reset" onclick="resetTransaction()">Reset</button>
+                    <button class="btn btn-print" onclick="printReceipt()">Bayar / Cetak</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="receipt-area">
+        <div class="receipt-header">
+            <h3>Yuli Bakery</h3>
+            <p>Jl. Anggrek No.115</p>
+            <p id="receipt-date">-</p>
+            <hr>
+        </div>
+        <div id="receipt-items"></div>
+        <hr>
+        <div class="receipt-footer">
+            <div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="receipt-subtotal">0</span></div>
+            <div style="display:flex; justify-content:space-between;" id="receipt-disc-row"><span>Potongan:</span><span id="receipt-discount">0</span></div>
+            <div style="display:flex; justify-content:space-between;" class="receipt-bold"><span>Total:</span><span id="receipt-final">0</span></div>
+            <br>
+            <div style="display:flex; justify-content:space-between;"><span>Tunai:</span><span id="receipt-pay">0</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Kembali:</span><span id="receipt-change">0</span></div>
+        </div>
+        <hr>
+        <div class="receipt-thanks">
+            <p>Terima Kasih</p>
+        </div>
+    </div>
+
+    <!-- Java Script -->
+    <script>
+        // CONFIG DISKON
+        const MIN_ITEMS_FOR_DISCOUNT = 4; // Minimal item untuk dapat diskon
+        const DISCOUNT_PERCENTAGE = 0.10; // Besar diskon (0.10 = 10%)
+
+        const products = [
+            { id: 1, name: 'Cupcake', price: 15000, img: 'red velvet cupcake.jpg' },
+            { id: 2, name: 'Donut', price: 5000, img: 'donut.jpg' },
+            { id: 3, name: 'Tart', price: 90000, img: 'tart fruit.jpg' },
+            { id: 4, name: 'Deesertbox', price: 25000, img: 'deseert box.jpg' },
+            { id: 5, name: 'Cookies', price: 10000, img: 'coco chip cookies.jpg' },
+            { id: 6, name: 'Matcha latte', price: 15000, img: 'matcha.jpg' },
+            { id: 7, name: 'Pudding', price: 10000, img: 'fruit Puding.jpg' },
+            { id: 8, name: 'Brownies', price: 60000, img: 'brownies.jpg' },
+            { id: 9, name: 'Tiramisu cake', price: 25000, img: 'tiramisu.jpg' },
+            { id: 10, name: 'Redvelvet cake', price: 25000, img: 'red velvet.jpg' },
+
+        ];
+
+        let cart = [];
+
+        function renderProducts() {
+            const container = document.getElementById('productContainer');
+            container.innerHTML = '';
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.onclick = () => addToCart(p.id);
+                card.innerHTML = `
+                    <img src="${p.img}" alt="${p.name}" class="product-img">
+                    <div class="product-info">
+                        <h3>${p.name}</h3>
+                        <div class="price">${formatRupiah(p.price)}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function addToCart(id) {
+            const item = cart.find(i => i.id === id);
+            if (item) item.qty++;
+            else {
+                const product = products.find(p => p.id === id);
+                cart.push({ ...product, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(i => i.id !== id);
+            updateCartUI();
+        }
+
+        // --- UPDATE LOGIC UTAMA ---
+        function updateCartUI() {
+            const list = document.getElementById('cartList');
+            const subtotalEl = document.getElementById('subtotalDisplay');
+            const discountRow = document.getElementById('discountRow');
+            const discountEl = document.getElementById('discountDisplay');
+            const totalEl = document.getElementById('totalDisplay');
+            const countEl = document.getElementById('cartCount');
+
+            list.innerHTML = '';
+            let subtotal = 0;
+            let totalQty = 0;
+
+            if (cart.length === 0) {
+                list.innerHTML = '<li style="text-align:center; padding:20px; color:#9ca3af;">Keranjang kosong</li>';
+            } else {
+                cart.forEach(item => {
+                    subtotal += item.price * item.qty;
+                    totalQty += item.qty;
+
+                    const li = document.createElement('li');
+                    li.className = 'cart-item';
+                    li.innerHTML = `
+                        <div class="item-info">
+                            <strong>${item.name}</strong>
+                            <small>${item.qty} x ${item.price.toLocaleString('id-ID')}</small>
+                        </div>
+                        <div style="display:flex; align-items:center;">
+                            <span style="font-weight:bold;">${formatRupiah(item.price * item.qty)}</span>
+                            <button class="btn-remove" onclick="removeFromCart(${item.id})">✕</button>
+                        </div>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+
+            // LOGIKA DISKON
+            let discountAmount = 0;
+            if (totalQty >= MIN_ITEMS_FOR_DISCOUNT) {
+                discountAmount = subtotal * DISCOUNT_PERCENTAGE;
+                discountRow.style.display = 'flex'; // Munculkan baris diskon
+                discountEl.innerText = "- " + formatRupiah(discountAmount);
+            } else {
+                discountAmount = 0;
+                discountRow.style.display = 'none'; // Sembunyikan baris diskon
+            }
+
+            let finalTotal = subtotal - discountAmount;
+
+            // Update Tampilan UI
+            subtotalEl.innerText = formatRupiah(subtotal);
+            
+            // Simpan data angka murni di dataset untuk perhitungan kembalian & struk
+            totalEl.dataset.value = finalTotal; 
+            totalEl.dataset.subtotal = subtotal;
+            totalEl.dataset.discount = discountAmount;
+            
+            totalEl.innerText = formatRupiah(finalTotal);
+            countEl.innerText = totalQty + " item";
+            
+            calculateChange();
+        }
+
+        function calculateChange() {
+            // Ambil Total Akhir (setelah diskon)
+            const total = parseFloat(document.getElementById('totalDisplay').dataset.value) || 0;
+            const pay = parseFloat(document.getElementById('paymentInput').value) || 0;
+            const changeBox = document.getElementById('changeBox');
+            const changeDisplay = document.getElementById('changeDisplay');
+
+            const change = pay - total;
+            
+            if (total > 0 && change >= 0) {
+                changeBox.className = 'change-display change-ok';
+                changeDisplay.innerText = formatRupiah(change);
+            } else if (total > 0) {
+                changeBox.className = 'change-display change-bad';
+                changeDisplay.innerText = "Kurang " + formatRupiah(Math.abs(change));
+            } else {
+                changeBox.className = 'change-display';
+                changeDisplay.innerText = 'Rp 0';
+            }
+        }
+
+        function resetTransaction() {
+            if(!confirm('Reset transaksi ini?')) return;
+            cart = [];
+            document.getElementById('paymentInput').value = '';
+            updateCartUI();
+        }
+
+        function printReceipt() {
+            const totalEl = document.getElementById('totalDisplay');
+            const finalTotal = parseFloat(totalEl.dataset.value) || 0;
+            const subtotal = parseFloat(totalEl.dataset.subtotal) || 0;
+            const discount = parseFloat(totalEl.dataset.discount) || 0;
+            const pay = parseFloat(document.getElementById('paymentInput').value) || 0;
+
+            if (cart.length === 0) return alert("Keranjang kosong!");
+            if (pay < finalTotal) return alert("Uang pembayaran kurang!");
+
+            document.getElementById('receipt-date').innerText = new Date().toLocaleString('id-ID');
+            const container = document.getElementById('receipt-items');
+            container.innerHTML = '';
+
+            cart.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'receipt-item';
+                div.innerHTML = `
+                    <span>${item.name} x${item.qty}</span>
+                    <span>${formatRupiah(item.price * item.qty)}</span>
+                `;
+                container.appendChild(div);
+            });
+
+            // Isi Footer Struk
+            document.getElementById('receipt-subtotal').innerText = formatRupiah(subtotal);
+            
+            // Tampilkan baris diskon di struk HANYA jika ada diskon
+            const receiptDiscRow = document.getElementById('receipt-disc-row');
+            if(discount > 0) {
+                receiptDiscRow.style.display = 'flex';
+                document.getElementById('receipt-discount').innerText = "- " + formatRupiah(discount);
+            } else {
+                receiptDiscRow.style.display = 'none';
+            }
+
+            document.getElementById('receipt-final').innerText = formatRupiah(finalTotal);
+            document.getElementById('receipt-pay').innerText = formatRupiah(pay);
+            document.getElementById('receipt-change').innerText = formatRupiah(pay - finalTotal);
+
+            window.print();
+        }
+
+        function formatRupiah(num) {
+            return 'Rp ' + num.toLocaleString('id-ID');
+        }
+
+        renderProducts();
+    </script>
+
+</body>
+</html>
